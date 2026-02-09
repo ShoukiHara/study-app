@@ -40,8 +40,8 @@ const App = () => {
     setResult(null);
 
     try {
-      // API_URLを使ってリクエスト
-      const response = await fetch(`${API_URL}/diagnose`, {
+      // ★ここを新しいURL (...lua1...) に修正しました！
+      const response = await fetch('https://study-api-lua1.onrender.com/diagnose', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

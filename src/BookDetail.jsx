@@ -44,10 +44,10 @@ const BookDetail = () => {
     if (rating === 0) return alert("星の数を選んでください");
 
     try {
-      // どの本に対するコメントか分かるように、タイトルを自動付与
       const fullComment = `【本: ${book.title}】 ${comment}`;
 
-      await fetch(`${API_URL}/feedback`, {
+      // ★ここも新しいURL (...lua1...) に修正しました！
+      await fetch('https://study-api-lua1.onrender.com/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
