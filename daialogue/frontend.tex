@@ -1,0 +1,192 @@
+\documentclass[dvipdfmx]{jsarticle}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[top=25mm, bottom=25mm, left=25mm, right=25mm]{geometry}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable, skins}
+
+% 見出し番号を消す設定
+\setcounter{secnumdepth}{0}
+
+% コードブロックのスタイル設定
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color[gray]{0.95},
+    frame=single,
+    breaklines=true,
+    columns=fullflexible,
+    keepspaces=true,
+    xleftmargin=0mm,
+    xrightmargin=0mm
+}
+
+% 用語解説用のボックス設定
+\newtcolorbox{termbox}[1]{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    title=\textbf{#1},
+    breakable,
+    enhanced,
+    width=\linewidth
+}
+
+% 警告用のボックス設定（絵文字を削除し、文字で代用）
+\newtcolorbox{warnbox}[1]{
+    colback=red!5!white,
+    colframe=red!75!black,
+    title=\textbf{【注意】 #1},
+    breakable,
+    enhanced,
+    width=\linewidth
+}
+
+\title{\textbf{Webアプリ開発の基礎：フロントエンド完全ガイド}}
+\author{開発学習ノート}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{はじめに}
+本ドキュメントは、Reactを用いたフロントエンド開発の全体像と、プロジェクトを構成する全ファイルの役割を詳細に解説したものである。特に「どのファイルがアプリのどの挙動を制御しているか」に重点を置いている。
+
+\section{第1部：フロントエンド製作の流れ}
+
+\subsection{Step 1: 土台と道具の準備}
+まず、自分のパソコンでプログラミングができる状態を作る。
+
+\begin{termbox}{Node.js（ノード・ジェイエス）}
+パソコンの中でJavaScriptを動かすためのエンジン。これがないと開発ツールが動かない。家づくりで言う「電力」。
+\end{termbox}
+
+\begin{termbox}{npm（エヌ・ピー・エム）}
+世界中の開発者が作った便利な道具（ライブラリ）をカタログから選んでダウンロードしてくれる管理ツール。
+\end{termbox}
+
+\subsection{Step 2: 骨組みを作る}
+\begin{termbox}{Vite（ヴィート）}
+Reactなどの開発環境を高速に構築するビルドツール。面倒な設定を自動化してくれる現場監督。
+\end{termbox}
+
+\begin{termbox}{React（リアクト）}
+「UI（画面の部品）」を作るためのライブラリ。HTMLを直接書くのではなく、「Component（部品）」を組み合わせて画面を作る。
+\end{termbox}
+
+\paragraph{コマンド:}
+\texttt{npm create vite@latest study-app -- --template react}
+
+\subsection{Step 3: デザインの準備}
+\begin{termbox}{Tailwind CSS}
+CSSファイルを別に作らず、タグの中にクラス名を書くだけでデザインできるツール。
+\end{termbox}
+
+\subsection{Step 4: 実装と確認}
+\begin{termbox}{Localhost（ローカルホスト）}
+自分のパソコンの中に一時的に立ち上げたWebサーバー。自分だけが見られるテスト環境。
+\end{termbox}
+
+\newpage
+
+\section{第2部：ファイル構成図解（File Map）}
+プロジェクトフォルダ（study-app）内の全ファイルの役割を、「ソースコード」「設定ファイル」「システムファイル」の3つに分類して詳細解説する。
+
+\subsection{1. ソースコード（srcフォルダ：開発の主戦場）}
+ここにあるファイルが、実際にブラウザに表示される画面や動きを作る。
+
+\begin{itemize}
+    \item \textbf{\texttt{src/App.jsx}} \\
+    \textbf{【役割：メインステージ・脚本】} \\
+    このアプリの「本体」。今回編集した入力フォームやスライダーはここに記述されている。
+    \begin{itemize}
+        \item \textbf{役割詳細}:
+        \begin{itemize}
+            \item \textbf{見た目 (JSX)}: \texttt{return (...)} の中に書かれたHTML風のコードが、実際の画面になる。
+            \item \textbf{記憶 (useState)}: ユーザーが入力した「偏差値」や「勉強時間」を一時保存する箱を作る。
+            \item \textbf{動き (Function)}: 「ボタンが押されたら何をするか」というロジックを記述する。
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{\texttt{src/main.jsx}} \\
+    \textbf{【役割：電源スイッチ・架け橋】} \\
+    プログラムが最初に動き出す場所。
+    \begin{itemize}
+        \item \textbf{役割詳細}: \texttt{index.html} にある「空っぽの箱（root）」を見つけ出し、そこに \texttt{App.jsx} の内容を流し込む（マウントする）処理を行っている。また、\texttt{index.css} を読み込んでアプリ全体にデザインを適用させるのもここの仕事。
+    \end{itemize}
+
+    \item \textbf{\texttt{src/index.css}} \\
+    \textbf{【役割：デザインの源泉】} \\
+    アプリ全体のスタイルシート。
+    \begin{itemize}
+        \item \textbf{役割詳細}: 通常のCSSを書く場所だが、今回はTailwind CSSを使うための「3つの呪文（\texttt{@tailwind ...}）」が書かれている。これがTailwindの全機能を呼び出している。
+    \end{itemize}
+
+    \item \textbf{\texttt{src/assets/}} \\
+    \textbf{【役割：素材置き場】} \\
+    画像ファイルやアイコンなどを置くフォルダ。ここに置いた画像は、プログラム内で \texttt{import} して使うことができる。
+\end{itemize}
+
+\subsection{2. 設定ファイル（ルート階層：司令塔）}
+アプリの動かし方やルールを決めるファイル群。
+
+\begin{itemize}
+    \item \textbf{\texttt{package.json}} \\
+    \textbf{【役割：プロジェクトの身分証・レシピ】} \\
+    \begin{itemize}
+        \item \textbf{詳細}: アプリ名、バージョン、そして「このアプリを作るのに必要な部品（React, Tailwindなど）」のリストが書かれている。他人と開発するときは、このファイルを共有することで同じ環境を再現できる。
+    \end{itemize}
+
+    \item \textbf{\texttt{vite.config.js}} \\
+    \textbf{【役割：現場監督への指示書】} \\
+    Vite（ビルドツール）の設定。Reactを使うためのプラグイン設定などが書かれている。ポート番号を変えたい時などはここを編集する。
+
+    \item \textbf{\texttt{tailwind.config.js}} \\
+    \textbf{【役割：デザインのルールブック】} \\
+    Tailwind CSSの設定。「どのファイルにデザインを適用するか（content）」を指定する重要ファイル。ここが間違っているとデザインが反映されない。
+
+    \item \textbf{\texttt{postcss.config.js}} \\
+    \textbf{【役割：翻訳機の設定】} \\
+    Tailwindなどの新しいCSS記法を、ブラウザが理解できる標準的なCSSに変換するための設定。
+
+    \item \textbf{\texttt{.eslintrc.cjs} / \texttt{eslint.config.js}} \\
+    \textbf{【役割：校正係】} \\
+    コードに書き間違いや、推奨されない書き方がないかをチェックするツール（ESLint）の設定ファイル。
+\end{itemize}
+
+\subsection{3. システム・管理ファイル（触るな危険エリア）}
+自動生成されたり、ブラウザが直接読み込んだりするファイル群。
+
+\begin{warnbox}{node\_modules/ （フォルダ）}
+\textbf{【役割：巨大倉庫・部品の山】} \\
+\texttt{npm install} でダウンロードしてきた数千個のライブラリ（部品）の実物が保管されている場所。
+\begin{itemize}
+    \item \textbf{注意}: 非常にサイズが大きい。中身を直接編集してはいけない。削除しても \texttt{package.json} があれば \texttt{npm install} で復元できる。
+\end{itemize}
+\end{warnbox}
+
+\begin{itemize}
+    \item \textbf{\texttt{package-lock.json}} \\
+    \textbf{【役割：納品書・確定したレシピ】} \\
+    \texttt{package.json} よりも詳しく、「実際にインストールされた部品の正確なバージョン」が自動で記録されるファイル。手動で編集してはいけない。
+
+    \item \textbf{\texttt{.gitignore}} \\
+    \textbf{【役割：無視リスト】} \\
+    Git（保存ツール）に対して、「保存しなくていいファイル（node\_modulesなど）」を教えるリスト。これがないと、巨大なファイルを誤ってアップロードしてしまう。
+
+    \item \textbf{\texttt{index.html}} \\
+    \textbf{【役割：外箱・コンテナ】} \\
+    ブラウザが一番最初に読み込むファイル。
+    \begin{itemize}
+        \item \textbf{詳細}: 中身はほぼ空っぽで、\texttt{<div id="root"></div>} という「Reactを表示するための場所」だけが用意されている。また、\texttt{src/main.jsx} を読み込むスクリプトタグがあり、そこから全てが始まる。
+    \end{itemize}
+
+    \item \textbf{\texttt{public/}} \\
+    \textbf{【役割：そのまま公開する棚】} \\
+    ここに置いたファイル（favicon.icoなど）は、加工されずにそのままインターネット上に公開される。
+\end{itemize}
+
+\end{document}

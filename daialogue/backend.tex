@@ -1,0 +1,161 @@
+\documentclass[dvipdfmx]{jsarticle}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[top=25mm, bottom=25mm, left=25mm, right=25mm]{geometry}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable, skins}
+
+% 見出し番号を消す設定
+\setcounter{secnumdepth}{0}
+
+% コードブロックのスタイル設定
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color[gray]{0.95},
+    frame=single,
+    breaklines=true,
+    columns=fullflexible,
+    keepspaces=true,
+    xleftmargin=0mm,
+    xrightmargin=0mm
+}
+
+% 用語解説用のボックス設定
+\newtcolorbox{termbox}[1]{
+    colback=green!5!white,
+    colframe=green!55!black,
+    title=\textbf{#1},
+    breakable,
+    enhanced,
+    width=\linewidth
+}
+
+% 重要な概念用のボックス
+\newtcolorbox{conceptbox}[1]{
+    colback=orange!5!white,
+    colframe=orange!65!black,
+    title=\textbf{★ #1},
+    breakable,
+    enhanced,
+    width=\linewidth
+}
+
+% ★追加：これが抜けていたためエラーになっていました
+\newtcolorbox{warnbox}[1]{
+    colback=red!5!white,
+    colframe=red!75!black,
+    title=\textbf{【注意】 #1},
+    breakable,
+    enhanced,
+    width=\linewidth
+}
+
+\title{\textbf{Webアプリ開発の基礎：バックエンド完全ガイド}}
+\author{開発学習ノート}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{はじめに}
+本ドキュメントは、PythonとFastAPIを用いたバックエンド（サーバーサイド）開発の仕組みと、各ファイルの役割を整理したものである。「厨房」の役割を果たすサーバーが、どのように動いているかを解説する。
+
+\section{第1部：バックエンド開発の流れ}
+
+\subsection{Step 1: 環境の隔離（Virtual Environment）}
+Python開発では、プロジェクトごとに「専用の道具箱」を作るのが鉄則である。
+
+\begin{termbox}{venv（ブイ・エンブ）}
+「Virtual Environment（仮想環境）」の略。パソコン全体の設定を汚さずに、このアプリ専用の Python 環境を作る機能。
+\end{termbox}
+\begin{itemize}
+    \item コマンド: \texttt{python -m venv venv}
+    \item 有効化: \texttt{.{\textbackslash}venv{\textbackslash}Scripts{\textbackslash}Activate} （これを行うと行頭に \texttt{(venv)} が付く）
+\end{itemize}
+
+\subsection{Step 2: サーバー構築（FastAPI）}
+\begin{termbox}{FastAPI（ファスト・エーピーアイ）}
+PythonでWeb API（アプリの窓口）を作るための最新フレームワーク。高速で、コードが書きやすく、自動でドキュメントを作ってくれる優れもの。
+\end{termbox}
+
+\begin{termbox}{Uvicorn（ユービコーン）}
+書いたPythonコードを、実際にWebサーバーとして動かすための実行ソフト。FastAPIとセットで使う。
+\end{termbox}
+
+\subsection{Step 3: 通信の許可（CORS）}
+\begin{conceptbox}{CORS（コアーズ：Cross-Origin Resource Sharing）}
+Webブラウザのセキュリティ機能。「違う場所（オリジン）からのアクセス」をブロックする仕組み。\par
+\textbf{今回の状況:}
+\begin{itemize}
+    \item フロントエンド: \texttt{localhost:5173} （React）
+    \item バックエンド: \texttt{localhost:8000} （Python）
+\end{itemize}
+住所（ポート番号）が違うため、何もしないと通信がブロックされる。バックエンド側で「5173からのアクセスはOKだよ」と許可証（Allow Origins）を発行する必要がある。
+\end{conceptbox}
+
+\newpage
+
+\section{第2部：ファイル構成図解（Backend Map）}
+\texttt{study-api} フォルダ内の構成。
+
+\subsection{1. 実行ファイル}
+\begin{itemize}
+    \item \textbf{\texttt{main.py}} \\
+    \textbf{【役割：厨房の司令塔】} \\
+    バックエンドの全てのロジックが書かれたファイル。
+    \begin{itemize}
+        \item \textbf{CORS設定}: Reactからの接続を許可する設定。
+        \item \textbf{BaseModel (Pydantic)}: 「どんなデータ（型）を受け取るか」を定義した伝票。今回は「学年」「教科」「勉強時間」などを定義した。
+        \item \textbf{@app.post("/diagnose")}: 実際の注文受付窓口。データを受け取り、処理（今回はモックの返信）をして返す場所。
+    \end{itemize}
+\end{itemize}
+
+\subsection{2. 環境・システムファイル}
+\begin{itemize}
+    \item \textbf{\texttt{venv/} （フォルダ）} \\
+    \textbf{【役割：専用の道具箱】} \\
+    このフォルダの中に、インストールしたライブラリ（FastAPIなど）の実体が入っている。
+    \begin{itemize}
+        \item \textbf{注意}: このフォルダはGitなどにアップロードしてはいけない（サイズが大きいため）。
+    \end{itemize}
+\end{itemize}
+
+\section{第3部：フロントエンドとの連携の仕組み}
+
+\subsection{1. リクエスト（注文）}
+React（フロントエンド）の \texttt{fetch} 関数が、Pythonサーバーの \texttt{/diagnose} というURLにデータを投げる。
+\begin{lstlisting}[language=java]
+// フロントエンド側のコードイメージ
+fetch('http://127.0.0.1:8000/diagnose', {
+    method: 'POST',
+    body: JSON.stringify(formData) // 入力データをJSONにして送る
+})
+\end{lstlisting}
+
+\subsection{2. レスポンス（料理の提供）}
+Python（バックエンド）がデータを受け取り、辞書型（dict）で返事を返す。FastAPIが自動的にこれをJSON（Webの標準データ形式）に変換してReactに届ける。
+
+\begin{lstlisting}[language=python]
+# バックエンド側のコードイメージ
+return {
+    "summary": "AIからのアドバイス...",
+    "books": [...]
+}
+\end{lstlisting}
+
+\section{開発中の注意点}
+\begin{warnbox}{2つのターミナルを維持する}
+アプリを動かすためには、以下の2つが同時に動いている必要がある。
+\begin{enumerate}
+    \item \textbf{React (Wait Staff)}: \texttt{npm run dev}
+    \item \textbf{FastAPI (Chef)}: \texttt{uvicorn main:app --reload}
+\end{enumerate}
+片方でも止まっていると、画面が表示されなかったり、診断ボタンを押してもエラーになったりする。
+\end{warnbox}
+
+\end{document}
