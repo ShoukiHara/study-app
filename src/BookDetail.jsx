@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Book, Info, AlertCircle, Search, Star, Send } from 'lucide-react';
 
 // ▼ 完成したRenderのURLを設定しました
-const API_URL = import.meta.env.VITE_API_URL || "https://study-api-lua1.onrender.com";
+const API_URL = "https://study-api-lua1.onrender.com";
 
 const BookDetail = () => {
   const { state } = useLocation();
